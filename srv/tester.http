@@ -1,0 +1,74 @@
+###GET PurchaseRequestsSet
+GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet
+Authorization: Basic Rajesh:2610
+
+###GET DepartmentsSet
+GET http://localhost:4004/odata/v4/purchase-requests/DepartmentsSet
+
+### GET ItemCategoriesSet
+GET http://localhost:4004/odata/v4/purchase-requests/ItemCategoriesSet
+
+###------------------------------------------------------------------------
+
+###
+GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet?$filter=requestNo eq 'PR-1009'
+
+### Create a new purchase request
+POST http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet
+Content-Type: application/json
+
+{
+    "requestNo": "PR-1009",
+    "requesterName": "Spiderman",
+    "requesterEmail": "Spiderman@test.com",
+    "department": "IT",
+    "itemName": "Macbook",
+    "itemCategory": "LAPTOP",
+    "quantity": 1,
+    "estimatedAmount": 22000,
+    "currency": "INR",
+    "requestDate": "2026-12-25",
+    "requiredByDate": "2026-12-27",
+    "businessJustification": "Need laptop for project",
+    "status": ""
+}
+
+
+
+### Update a purchase request
+PATCH  http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(7091126b-4209-412b-bbdc-f1c560ddfe6d)
+Content-Type: application/json
+
+{
+    "requesterName": "Spidy"
+}
+
+### GET a purchase request
+GET  http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(5f5977a3-8b4e-4cae-b95f-3bb6114a758e)
+
+
+###-------------------------------------------------------------------------------------------------------------
+
+###Action: Approve a purchase request
+POST http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(7091126b-4209-412b-bbdc-f1c560ddfe6d)/approveRequest
+Content-Type: application/json
+
+{
+    "approverEmail": "manager@test.com",
+    "approverRemarks": "Approved for business requirement"
+}
+
+###Action: Reject a purchase request
+POST http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(4f29dc4f-4be7-401b-8467-1c24eec96510)/rejectRequest
+Content-Type: application/json
+
+{
+    "approverEmail": "manager@test.com",
+    "approverRemarks": "rejected due to budget constraints"
+}
+
+
+###-------------------------------------------------------------------------------------
+
+#### GET PurchaseRequestReport
+GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestReport

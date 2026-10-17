@@ -1,0 +1,5 @@
+ID,requestNo,requesterName,requesterEmail,department_code,itemName,itemCategory_code,quantity,estimatedAmount,currency,requestDate,requiredByDate,businessJustification,status
+550e8400-e29b-41d4-a716-446655440001,PR-1001,Anita Rao,anita@test.com,FIN,Monitor,MONITOR,2,30000,INR,2026-05-02,2026-05-20,Required for finance reporting team,Approved
+550e8400-e29b-41d4-a716-446655440002,PR-1002,John Mathew,john@test.com,SCM,Headset,HEADSET,5,15000,INR,2026-05-05,2026-05-25,Required for support team calls,Rejected
+550e8400-e29b-41d4-a716-446655440003,PR-1003,Rajesh Kumar,rajesh@test.com,IT,Software License,SOFTWARE,3,15000,INR,2026-05-10,2026-05-20,employee setup,Submitted
+550e8400-e29b-41d4-a716-446655440004,PR-1004,Suresh Babu,suresh@test.com,FIN,Stationery,STATIONERY,1,20000,INR,2026-05-12,2026-05-28,Required for finance department printing,Approved

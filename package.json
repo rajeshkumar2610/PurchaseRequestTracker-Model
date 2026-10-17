@@ -1,0 +1,59 @@
+{
+  "name": "PurchaseRequestTracker-MyBuild",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@cap-js/hana": "^3",
+    "@sap/cds": "^10"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^3",
+    "cds-plugin-ui5": "^0.17.0"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch-purchaserequest-ui": "cds watch --open rajesh.ui.purchaserequestui/index.html?sap-ui-xx-viewCache=false --livereload false"
+  },
+  "private": true,
+  "workspaces": [
+    "app/*"
+  ],
+  "sapux": [
+    "app/purchaserequest-ui"
+  ],
+  "cds": {
+    "requires": {
+      "auth": {
+        "[development]": {
+          "kind": "mocked",
+          "users": {
+            "Rajesh": {
+              "password": "2610",
+              "roles": [
+                "RequesterRole"
+              ]
+            },
+            "Naveen": {
+              "password": "1234",
+              "roles": [
+                "ApproverRole"
+              ]
+            },
+            "Krishna": {
+              "password": "4321",
+              "roles": [
+                "AdminRole"
+              ]
+            },
+            "*": false
+          }
+        }
+      },
+      "[production]": {
+        "auth": {
+          "kind": "xsuaa"
+        }
+      }
+    }
+  }
+}
