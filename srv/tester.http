@@ -96,3 +96,57 @@ Authorization: Basic Krishna:4321
 
 #### GET PurchaseRequestReport
 GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestReport
+
+
+
+###-------------------------------------------------------------------------------------
+
+
+###  STEP 1: Create a Draft of the Purchase Request (for ID=550e8400-e29b-41d4-a716-446655440004)
+POST http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(ID=550e8400-e29b-41d4-a716-446655440004,IsActiveEntity=true)/PurchaseRequestService.draftEdit
+Content-Type: application/json
+Authorization: Basic Krishna:4321
+
+{
+  "PreserveChanges": true
+}
+
+#### STEP 2: Create an attachment inside the draft of PR (ID=550e8400-e29b-41d4-a716-446655440004)
+POST http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(ID=550e8400-e29b-41d4-a716-446655440004,IsActiveEntity=false)/attachments
+Content-Type: application/json
+Authorization: Basic Krishna:4321
+
+{
+  "fileName": "quotation.pdf",
+  "mimeType": "application/pdf",
+  "size": 12345
+}
+
+
+### STEP 3: View Attachments in the Purchase Request Draft
+GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(ID=550e8400-e29b-41d4-a716-446655440004,IsActiveEntity=false)/attachments
+Authorization: Basic Krishna:4321
+
+
+### STEP 4: Upload PDF content
+PUT http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestAttachmentsSet(ID=75c86ced-d006-4c67-a03f-f398b0b9778f,IsActiveEntity=false)/content?Content-Type=application/pdf
+Content-Type: application/pdf
+Authorization: Basic Krishna:4321
+
+<@../test-files/quotation.pdf
+
+
+### STEP 5: Download attachment PDF
+GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestAttachmentsSet(ID=75c86ced-d006-4c67-a03f-f398b0b9778f,IsActiveEntity=false)/content
+Authorization: Basic Krishna:4321
+
+### STEP 6: Save the Draft as an Active Purchase Request
+POST http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(ID=550e8400-e29b-41d4-a716-446655440004,IsActiveEntity=false)/PurchaseRequestService.draftActivate
+Content-Type: application/json
+Authorization: Basic Krishna:4321
+
+{}
+
+### STEP 7: Verify the Attachment in the Active Collection
+GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestAttachmentsSet
+Authorization: Basic Krishna:4321

@@ -21,6 +21,7 @@ context transaction {
         approverEmail         : String(100) @title: '{i18n>approverEmail}';
         approvalDate          : Date @title: '{i18n>approvalDate}';
         approverRemarks       : String(500) @title: '{i18n>approverRemarks}';
+        attachments : Composition of many PurchaseRequestAttachments on attachments.purchaseRequest = $self;
     }
      entity PurchaseRequestReport
         as select from PurchaseRequests {
@@ -30,6 +31,24 @@ context transaction {
             sum(estimatedAmount) as totalAmount   : Decimal(15,2)
         }
         group by department, status;
+
+
+    entity PurchaseRequestAttachments : managed {
+        key ID          : UUID;
+        purchaseRequest : Association to PurchaseRequests;
+        fileName        : String(255);
+
+        @Core.IsMediaType
+        mimeType        : String(100);
+        size            : Integer;
+
+        @Core.MediaType: mimeType
+        @Core.ContentDisposition.Filename: fileName
+        content         : LargeBinary;
+        uploadedBy      : String(100);
+        uploadedAt      : Timestamp;
+    }
+
 }
 
 context master {
@@ -37,16 +56,13 @@ context master {
         key code     : String(10);
             name     : String(100);
             isActive : Boolean;
-
-
     }
 
     entity ItemCategories {
         key code        : String(20);
         description : String(100);
-
-
     }
+
 }
 
 

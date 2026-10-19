@@ -4,7 +4,7 @@ using {
 } from '../db/datamodel';
 
 service PurchaseRequestService @(path    : 'purchase-requests', requires: 'authenticated-user') {
-
+    @cds.redirection.target
     @odata.draft.enabled
     entity PurchaseRequestsSet @(restrict: [
         { grant: 'READ', to: 'PurchaseRequestViewer' },
@@ -21,8 +21,7 @@ service PurchaseRequestService @(path    : 'purchase-requests', requires: 'authe
                     'in/approvalDate',
                     'in/approverRemarks'
                 ]
-            }
-            
+            }    
             action approveRequest(approverEmail: String(100) not null,
                                   approverRemarks: String(500));
 
@@ -34,10 +33,10 @@ service PurchaseRequestService @(path    : 'purchase-requests', requires: 'authe
                     'in/approvalDate',
                     'in/approverRemarks'
                 ]
-            }
-            
+            }  
             action rejectRequest(approverEmail: String(100) not null,
                                  approverRemarks: String(500) not null);
+
         };
 
      @restrict: [
@@ -59,4 +58,6 @@ service PurchaseRequestService @(path    : 'purchase-requests', requires: 'authe
     { grant: '*', to: 'PurchaseRequestAdmin' }
     ]
     entity PurchaseRequestReport as projection on transaction.PurchaseRequestReport;
+
+    entity PurchaseRequestAttachmentsSet as projection on transaction.PurchaseRequestAttachments;
 }

@@ -92,6 +92,11 @@ annotate service.PurchaseRequestsSet with @(
                 Target : '@UI.FieldGroup#Audit_Details',
                 Label:'Audit Details'
             },
+            {
+                $Type : 'UI.ReferenceFacet',
+                Target : 'attachments/@UI.LineItem',
+                Label : 'Attachments'
+            }
         ]
     } ],
 
@@ -247,3 +252,39 @@ annotate service.PurchaseRequestsSet with @(
         ]
     };
 }
+
+
+annotate service.PurchaseRequestAttachmentsSet with @(
+    UI.LineItem : [
+        {
+            $Type : 'UI.DataField',
+            Value : content,
+            Label : 'File'
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : fileName,
+            Label : 'File Name'
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : mimeType,
+            Label : 'File Type'
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : size,
+            Label : 'File Size (Bytes)'
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : uploadedBy,
+            Label : 'Uploaded By'
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : uploadedAt,
+            Label : 'Uploaded At'
+        }
+    ]
+);
