@@ -1,6 +1,20 @@
 ###GET PurchaseRequestsSet
-GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet
+GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet/$count
 Authorization: Basic Rajesh:2610
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ###GET DepartmentsSet
 GET http://localhost:4004/odata/v4/purchase-requests/DepartmentsSet
@@ -13,17 +27,24 @@ GET http://localhost:4004/odata/v4/purchase-requests/ItemCategoriesSet
 ###
 GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet?$filter=requestNo eq 'PR-1009'
 
+
+
+###
+GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(3371d98a-05f9-4caf-99d6-51eec57c6cee)
+Authorization: Basic Rajesh:2610
+
 ### Create a new purchase request
 POST http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet
 Content-Type: application/json
+Authorization: Basic Rajesh:2610
 
 {
     "requestNo": "PR-1009",
     "requesterName": "Spiderman",
     "requesterEmail": "Spiderman@test.com",
-    "department": "IT",
+    "department_code": "IT",
     "itemName": "Macbook",
-    "itemCategory": "LAPTOP",
+    "itemCategory_code": "LAPTOP",
     "quantity": 1,
     "estimatedAmount": 22000,
     "currency": "INR",
@@ -36,8 +57,9 @@ Content-Type: application/json
 
 
 ### Update a purchase request
-PATCH  http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(7091126b-4209-412b-bbdc-f1c560ddfe6d)
+PATCH  http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(550e8400-e29b-41d4-a716-446655440003)
 Content-Type: application/json
+Authorization: Basic Krishna:4321
 
 {
     "requesterName": "Spidy"
@@ -50,8 +72,9 @@ GET  http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(5f5977
 ###-------------------------------------------------------------------------------------------------------------
 
 ###Action: Approve a purchase request
-POST http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(7091126b-4209-412b-bbdc-f1c560ddfe6d)/approveRequest
+POST http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(550e8400-e29b-41d4-a716-446655440003)/approveRequest
 Content-Type: application/json
+Authorization: Basic Naveen:1234
 
 {
     "approverEmail": "manager@test.com",
@@ -59,8 +82,9 @@ Content-Type: application/json
 }
 
 ###Action: Reject a purchase request
-POST http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(4f29dc4f-4be7-401b-8467-1c24eec96510)/rejectRequest
+POST http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(550e8400-e29b-41d4-a716-446655440004)/rejectRequest
 Content-Type: application/json
+Authorization: Basic Krishna:4321
 
 {
     "approverEmail": "manager@test.com",

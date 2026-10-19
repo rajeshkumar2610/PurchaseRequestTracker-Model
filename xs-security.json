@@ -1,0 +1,67 @@
+{
+  "xsappname": "PurchaseRequestTracker",
+  "tenant-mode": "dedicated",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.PurchaseRequestViewer",
+      "description": "Associate able to view the PR"
+    },
+    {
+      "name": "$XSAPPNAME.PurchaseRequestCreator",
+      "description": "Associate able to create PR"
+    },
+    {
+      "name": "$XSAPPNAME.PurchaseRequestApprover",
+      "description": "Associate able to Approve PR"
+    },
+    {
+      "name": "$XSAPPNAME.PurchaseRequestAdmin",
+      "description": "Associate have admin access"
+    }
+  ],
+  "role-templates": [
+    {
+      "name": "RequesterRole",
+      "description": "Viewer + Creator",
+      "default-role-name": "The Requester",
+      "scope-references": [
+        "$XSAPPNAME.PurchaseRequestViewer",
+        "$XSAPPNAME.PurchaseRequestCreator"
+      ]
+    },
+    {
+      "name": "ApproverRole",
+      "description": "Viewer + Approver",
+      "default-role-name": "The Approver",
+      "scope-references": [
+        "$XSAPPNAME.PurchaseRequestViewer",
+        "$XSAPPNAME.PurchaseRequestApprover"
+      ]
+    },
+    {
+      "name": "AdminRole",
+      "description": "all scopes",
+      "default-role-name": "The Admin",
+      "scope-references": [
+        "$XSAPPNAME.PurchaseRequestViewer",
+        "$XSAPPNAME.PurchaseRequestCreator",
+        "$XSAPPNAME.PurchaseRequestApprover",
+        "$XSAPPNAME.PurchaseRequestAdmin"
+      ]
+    }
+  ],
+  "authorities": [
+    "$ACCEPT_GRANTED_AUTHORITIES"
+  ],
+  "oauth2-configuration": {
+    "token-validity": 900,
+    "redirect-uris": [
+      "https://*.cfapps.us10-001.hana.ondemand.com/login/callback"
+    ],
+    "credential-types": [
+      "binding-secret",
+      "x509"
+    ]
+  },
+  "xsenableasyncservice": "true"
+}

@@ -1,33 +1,62 @@
-using { rajesh.db.master, rajesh.db.transaction } from '../db/datamodel';
+using {
+    rajesh.db.master,
+    rajesh.db.transaction
+} from '../db/datamodel';
 
-service PurchaseRequestService @(path:'purchase-requests') {
+service PurchaseRequestService @(path    : 'purchase-requests', requires: 'authenticated-user') {
+
     @odata.draft.enabled
-    entity PurchaseRequestsSet as projection on transaction.PurchaseRequests
-    actions{
-        @Common.SideEffects:{
-            $Type : 'Common.SideEffectsType',
-            TargetProperties:['in/status','in/approverEmail','in/approvalDate','in/approverRemarks']
-        }
-        action approveRequest(
-            approverEmail:String(100) not null, 
-            approverRemarks:String(500)
-            );
+    entity PurchaseRequestsSet @(restrict: [
+        { grant: 'READ', to: 'PurchaseRequestViewer' },
+        { grant: 'CREATE', to: 'PurchaseRequestCreator' },
+        { grant: ['approveRequest', 'rejectRequest'], to: 'PurchaseRequestApprover' },
+        { grant: '*', to: 'PurchaseRequestAdmin' }
+    ])                           as projection on transaction.PurchaseRequests
+        actions {
+            @Common.SideEffects: {
+                $Type           : 'Common.SideEffectsType',
+                TargetProperties: [
+                    'in/status',
+                    'in/approverEmail',
+                    'in/approvalDate',
+                    'in/approverRemarks'
+                ]
+            }
+            
+            action approveRequest(approverEmail: String(100) not null,
+                                  approverRemarks: String(500));
 
-        @Common.SideEffects:{
-            $Type : 'Common.SideEffectsType',
-            TargetProperties:['in/status','in/approverEmail','in/approvalDate','in/approverRemarks']
-        }
-        action rejectRequest(
-            approverEmail:String(100) not null,
-            approverRemarks:String(500) not null
-        )
-    };
+            @Common.SideEffects: {
+                $Type           : 'Common.SideEffectsType',
+                TargetProperties: [
+                    'in/status',
+                    'in/approverEmail',
+                    'in/approvalDate',
+                    'in/approverRemarks'
+                ]
+            }
+            
+            action rejectRequest(approverEmail: String(100) not null,
+                                 approverRemarks: String(500) not null);
+        };
+
+     @restrict: [
+    { grant: 'READ', to: 'PurchaseRequestViewer' },
+    { grant: '*', to: 'PurchaseRequestAdmin' }
+    ]
+    entity DepartmentsSet        as projection on master.Departments;
 
 
-    entity DepartmentsSet  as projection on master.Departments;
-
-    entity ItemCategoriesSet  as projection on master.ItemCategories;
+    @restrict: [
+        { grant: 'READ', to: 'PurchaseRequestViewer' },
+        { grant: '*', to: 'PurchaseRequestAdmin' }
+    ]
+    entity ItemCategoriesSet     as projection on master.ItemCategories;
 
     @readonly
+     @restrict: [
+    { grant: 'READ', to: 'PurchaseRequestViewer' },
+    { grant: '*', to: 'PurchaseRequestAdmin' }
+    ]
     entity PurchaseRequestReport as projection on transaction.PurchaseRequestReport;
 }

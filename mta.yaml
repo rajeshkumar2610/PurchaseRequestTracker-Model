@@ -1,0 +1,69 @@
+_schema-version: 3.3.0
+ID: PurchaseRequestTracker-MyBuild
+version: 1.0.0
+description: "A simple CAP project."
+parameters:
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
+modules:
+  - name: PurchaseRequestTracker-MyBuild-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      instances: 1
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm-ci
+    provides:
+      - name: srv-api # required by consumers of CAP services (e.g. approuter)
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: PurchaseRequestTracker-MyBuild-db
+      - name: PurchaseRequestTracker-MyBuild-auth
+
+  - name: PurchaseRequestTracker-MyBuild-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    requires:
+      - name: PurchaseRequestTracker-MyBuild-db
+
+resources:
+  - name: PurchaseRequestTracker-MyBuild-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+  - name: PurchaseRequestTracker-MyBuild-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: PurchaseRequestTracker-MyBuild-${org}-${space}
+        tenant-mode: dedicated
+        oauth2-configuration:
+          credential-types:
+            - "binding-secret"
+            - "x509"
+        role-collections:
+          - name: 'RequesterRole (PurchaseRequestTracker-MyBuild ${org}-${space})'
+            description: 'generated'
+            role-template-references:
+              - '$XSAPPNAME.RequesterRole'
+          - name: 'ApproverRole (PurchaseRequestTracker-MyBuild ${org}-${space})'
+            description: 'generated'
+            role-template-references:
+              - '$XSAPPNAME.ApproverRole'
+          - name: 'AdminRole (PurchaseRequestTracker-MyBuild ${org}-${space})'
+            description: 'generated'
+            role-template-references:
+              - '$XSAPPNAME.AdminRole'
