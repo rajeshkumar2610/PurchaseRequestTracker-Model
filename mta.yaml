@@ -11,6 +11,25 @@ build-parameters:
         - npm ci
         - npx cds build --production
 modules:
+##Start of Rajesh code for purchasereq-router-ui = app router + fiori app
+  - name: purchasereq-router-ui
+    type: nodejs
+    path: app
+    parameters:
+      instances: 1
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm-ci
+    requires:
+      - name: PurchaseRequestTracker-MyBuild-auth
+      - name: srv-api
+        group: destinations
+        properties:
+          name: srv-api
+          strictSSL: true
+          forwardAuthToken: true
+          url: '~{srv-url}'
+##Start of Rajesh code for purchasereq-router-ui = app router + fiori app
   - name: PurchaseRequestTracker-MyBuild-srv
     type: nodejs
     path: gen/srv
