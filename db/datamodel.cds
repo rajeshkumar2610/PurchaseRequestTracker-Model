@@ -49,6 +49,20 @@ context transaction {
         uploadedAt      : Timestamp;
     }
 
+    entity PurchaseRequestUploadLogs : managed {
+        key ID       : UUID;
+        uploadId     : UUID;
+        rowNumber    : Integer;
+        status       : String(20);
+        errorMessage : String(1000);
+    }
+}
+
+type UploadResult {
+    totalRows   : Integer;
+    successRows : Integer;
+    failedRows  : Integer;
+    message     : String(500);
 }
 
 context master {

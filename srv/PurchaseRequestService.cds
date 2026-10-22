@@ -1,6 +1,7 @@
 using {
     rajesh.db.master,
-    rajesh.db.transaction
+    rajesh.db.transaction,
+    rajesh.db.UploadResult
 } from '../db/datamodel';
 
 service PurchaseRequestService @(path    : 'purchase-requests', requires: 'authenticated-user') {
@@ -37,7 +38,12 @@ service PurchaseRequestService @(path    : 'purchase-requests', requires: 'authe
             action rejectRequest(approverEmail: String(100) not null,
                                  approverRemarks: String(500) not null);
 
+
         };
+
+    action uploadPurchaseRequests(
+        fileName    : String(255),
+        fileContent : LargeString) returns UploadResult;
 
      @restrict: [
     { grant: 'READ', to: 'PurchaseRequestViewer' },
@@ -60,4 +66,6 @@ service PurchaseRequestService @(path    : 'purchase-requests', requires: 'authe
     entity PurchaseRequestReport as projection on transaction.PurchaseRequestReport;
 
     entity PurchaseRequestAttachmentsSet as projection on transaction.PurchaseRequestAttachments;
+
+    entity PurchaseRequestUploadLogsSet as projection on transaction.PurchaseRequestUploadLogs;
 }

@@ -1,10 +1,93 @@
 import cds from '@sap/cds'
+import * as XLSX from 'xlsx';
 
 export class PurchaseRequestService extends cds.ApplicationService { init() {
 
   const { PurchaseRequestsSet, DepartmentsSet, ItemCategoriesSet,  PurchaseRequestAttachmentsSet } = cds.entities('PurchaseRequestService')
+  const { SELECT, INSERT } = cds.ql;
 
-  const { SELECT } = cds.ql;
+  const { PurchaseRequests } =
+      cds.entities('rajesh.db.transaction');
+
+  const { PurchaseRequestUploadLogs } =
+      cds.entities('rajesh.db.transaction');
+
+// Master data used to validate Excel values
+    const { Departments, ItemCategories } =
+        cds.entities('rajesh.db.master');
+
+function validatePurchaseRequestRow(row) {
+    const errors = [];
+
+    // Check required fields
+    const requiredFields = [
+        'requesterName',
+        'requesterEmail',
+        'department',
+        'itemName',
+        'itemCategory',
+        'quantity',
+        'estimatedAmount',
+        'currency',
+        'requiredByDate',
+        'businessJustification'
+    ];
+
+    for (const field of requiredFields) {
+        if (
+            row[field] === undefined ||
+            row[field] === null ||
+            String(row[field]).trim() === ''
+        ) {
+            errors.push(`${field} is required`);
+        }
+    }
+
+    // Quantity must be a valid number greater than zero
+    if (
+        !Number.isFinite(Number(row.quantity)) ||
+        Number(row.quantity) <= 0
+    ) {
+        errors.push('Quantity must be a valid number greater than zero');
+    }
+
+    // Estimated amount must be a valid number greater than zero
+    if (
+        !Number.isFinite(Number(row.estimatedAmount)) ||
+        Number(row.estimatedAmount) <= 0
+    ) {
+        errors.push('Estimated amount must be a valid number greater than zero');
+    }
+
+    return {
+        valid: errors.length === 0,
+        errors: errors
+    };
+}
+
+
+function convertExcelDate(value) {
+    if (value === '' || value === undefined || value === null) {
+        return null;
+    }
+    
+
+    // Excel date stored as a number
+    if (typeof value === 'number') {
+        return new Date(
+            Date.UTC(1899, 11, 30) + value * 86400000
+        ).toISOString().slice(0, 10);
+    }
+
+    // JavaScript Date object
+    if (value instanceof Date) {
+        return value.toISOString().slice(0, 10);
+    }
+
+    // Date already provided as text
+    return String(value).slice(0, 10);
+}
+
   
   //Block for Creation Business rule
   this.before (['CREATE'], PurchaseRequestsSet, async (req) => {
@@ -186,12 +269,226 @@ export class PurchaseRequestService extends cds.ApplicationService { init() {
     console.log('Attachment deletion allowed.');
 });
 
-// this.on("approveRequest", async (req) =>{
 
-//   if(estimatedAmount > 25000 && estimatedAmount <= 100000){
-//     	decision = ReviewRequired, riskLevel = Medium, approver = Senior Manager
-//   }
-// })
+
+//UPLOAD Purchase Request Excel
+this.on('uploadPurchaseRequests', async (req) => {
+    const { fileName, fileContent } = req.data;
+
+    if (!fileName || !fileContent) {
+        return req.reject(400, 'File name and content are required.');
+    }
+
+    if (!fileName.toLowerCase().endsWith('.xlsx')) {
+        return req.reject(400, 'Please upload an .xlsx file.');
+    }
+
+    try {
+        // Convert Base64 text into binary data
+        const buffer = Buffer.from(fileContent, 'base64');
+
+        // Read the Excel workbook
+        const workbook = XLSX.read(buffer, { type: 'buffer' });
+
+        // Find the worksheet
+        const worksheet = workbook.Sheets['PurchaseRequests'];
+
+        if (!worksheet) {
+            return req.reject(
+                400,
+                'Worksheet PurchaseRequests was not found.'
+            );
+        }
+
+        // Convert worksheet rows into JavaScript objects
+        const rows = XLSX.utils.sheet_to_json(worksheet, {
+            defval: ''
+        });
+
+        // console.log('Excel rows parsed:', rows.length);
+        // console.log('All Excel rows:', rows);
+        // console.log('First row:', rows[0]);
+
+    // STEP 3: INSERT VALID EXCEL ROWS INTO DATABASE
+
+    // Counters to track how many rows succeed and fail
+    let successRows = 0;
+    let failedRows = 0;
+
+    // Create a database transaction for this upload request
+    const tx = cds.tx(req);
+
+    // Load departments and item categories from the database
+    const departments = await tx.run(
+        SELECT.from(Departments)
+    );
+
+    const itemCategories = await tx.run(
+        SELECT.from(ItemCategories)
+    );
+
+    // Keep only active departments
+    const activeDepartmentCodes = new Set(
+        departments
+            .filter(department => department.isActive === true)
+            .map(department => department.code)
+    );
+
+    // Store all valid item-category codes
+    const itemCategoryCodes = new Set(
+        itemCategories.map(category => category.code)
+    );
+
+    // Generate one unique ID to identify this Excel upload
+    const uploadId = cds.utils.uuid();
+
+    // Read existing purchase request numbers from the database
+    const existingRequests = await tx.run(
+        SELECT.from(PurchaseRequests).columns('requestNo')
+    );
+
+    // Find the highest existing request number (example: PR-1004)
+    // We will generate the next number from this value
+    let maxNumber = 1000;
+
+    for (const request of existingRequests) {
+        // Extract the number from a request number like PR-1004
+        const match = request.requestNo?.match(/^PR-(\d+)$/);
+
+        if (match) {
+            // Keep the highest number found
+            maxNumber = Math.max(maxNumber, Number(match[1]));
+        }
+    }
+
+    // Process every Excel row independently
+    for (const [index, row] of rows.entries()) {
+
+        // Step 3.1: Validate the current Excel row
+        const result = validatePurchaseRequestRow(row);
+
+        // Prepare the validation error message, if any
+        let errorMessage = result.errors.join(', ');
+
+        try {
+            // Only valid rows are allowed to proceed to database insertion
+            if (result.valid) {
+
+                // Validate department code against active master data
+                if (!activeDepartmentCodes.has(row.department)) {
+                    throw new Error(
+                        `Invalid or inactive department: ${row.department}`
+                    );
+                }
+
+                // Validate item category against master data
+                if (!itemCategoryCodes.has(row.itemCategory)) {
+                    throw new Error(
+                        `Invalid item category: ${row.itemCategory}`
+                    );
+                }
+                
+                // Use requestDate from Excel; if missing, use today's date
+                const requestDate =
+                    convertExcelDate(row.requestDate) ||
+                    new Date().toISOString().slice(0, 10);
+
+                // Convert the required delivery date from Excel format
+                const requiredByDate =
+                    convertExcelDate(row.requiredByDate);
+
+                    console.log('Row:', index + 1);
+                    console.log('Request date:', requestDate);
+                    console.log('Required date:', requiredByDate);
+                    
+                // Business rule: required date cannot be before request date
+                if (requiredByDate < requestDate) {
+                    throw new Error(
+                        'Required by date cannot be earlier than request date'
+                    );
+                }
+
+                // Generate a new request number, such as PR-1005
+                const requestNo = `PR-${++maxNumber}`;
+
+                // Prepare the data that will be saved in PurchaseRequests
+                const entry = {
+                    requestNo: requestNo,
+                    requesterName: row.requesterName,
+                    requesterEmail: row.requesterEmail,
+                    department_code: row.department,
+                    itemName: row.itemName,
+                    itemCategory_code: row.itemCategory,
+                    quantity: Number(row.quantity),
+                    estimatedAmount: Number(row.estimatedAmount),
+                    currency: row.currency,
+                    requestDate: requestDate,
+                    requiredByDate: requiredByDate,
+                    businessJustification: row.businessJustification,
+
+                    // Every newly uploaded request starts as Submitted
+                    status: 'Submitted'
+                };
+
+                // Insert the prepared purchase request into the database
+                await tx.run(
+                    INSERT.into(PurchaseRequests).entries(entry)
+                );
+
+                // Count success only after the database insert succeeds
+                successRows++;
+
+                console.log(
+                    `Row ${index + 1}: Inserted successfully (${requestNo})`
+                );
+
+            } else {
+                // Validation failed: stop this row from being inserted
+                throw new Error(errorMessage);
+            }
+
+        } catch (error) {
+            // This row failed validation or database insertion
+            failedRows++;
+
+            // Capture the reason for the failure
+            errorMessage = error.message || 'Database insert failed';
+
+            console.log(
+                `Row ${index + 1}: Failed - ${errorMessage}`
+            );
+
+            // Save the failed row's details in the upload log table
+            await tx.run(
+                INSERT.into(PurchaseRequestUploadLogs).entries({
+                    ID: cds.utils.uuid(),
+                    uploadId: uploadId,
+                    rowNumber: index + 1,
+                    status: 'Failed',
+                    errorMessage: errorMessage.slice(0, 1000)
+                })
+            );
+        }
+    }
+
+    // Return the final upload summary to Postman or the UI
+    return {
+        totalRows: rows.length,
+        successRows: successRows,
+        failedRows: failedRows,
+        message: 'Excel upload processing completed.'
+    };
+
+          } catch (error) {
+            // Log the actual reason the upload failed
+            console.error('Purchase request upload failed:', error);
+
+            return req.reject(
+                500,
+                'Purchase request upload failed. Check the server logs.'
+            );
+        }
+      });
 
 
   return super.init()

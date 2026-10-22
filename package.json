@@ -5,7 +5,8 @@
   "dependencies": {
     "@cap-js/hana": "^3",
     "@sap/cds": "^10",
-    "@sap/xssec": "^4"
+    "@sap/xssec": "^4",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@cap-js/sqlite": "^3",
@@ -35,9 +36,9 @@
                 "PurchaseRequestViewer",
                 "PurchaseRequestCreator"
               ],
-                "attr": {
-                  "email": "royalrajesh2610@gmail.com"
-                }
+              "attr": {
+                "email": "royalrajesh2610@gmail.com"
+              }
             },
             "Naveen": {
               "password": "1234",
@@ -58,8 +59,8 @@
             "*": false
           }
         },
-        "[production]":{
-            "kind": "xsuaa"
+        "[production]": {
+          "kind": "xsuaa"
         }
       }
     }
