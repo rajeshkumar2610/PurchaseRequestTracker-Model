@@ -65,6 +65,14 @@ type UploadResult {
     message     : String(500);
 }
 
+type ApprovalRecommendation {
+  decision               : String(30);   // Recommended / ReviewRequired / NotRecommended
+  riskLevel              : String(20);   // Low / Medium / High
+  suggestedApproverLevel : String(30);   // Manager / Senior Manager / Director
+  message                : String(500);
+}
+
+
 context master {
     entity Departments {
         key code     : String(10);

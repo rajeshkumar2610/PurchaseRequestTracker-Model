@@ -1,5 +1,5 @@
 ###GET PurchaseRequestsSet
-GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet/$count
+GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet
 Authorization: Basic Rajesh:2610
 
 
@@ -69,7 +69,7 @@ GET  http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(5f5977
 ###-------------------------------------------------------------------------------------------------------------
 
 ###Action: Approve a purchase request
-POST http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(550e8400-e29b-41d4-a716-446655440003)/approveRequest
+POST http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(550e8400-e29b-41d4-a716-446655440004)/approveRequest
 Content-Type: application/json
 Authorization: Basic Naveen:1234
 
@@ -126,7 +126,7 @@ Authorization: Basic Krishna:4321
 
 
 ### STEP 4: Upload PDF content
-PUT http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestAttachmentsSet(ID=75c86ced-d006-4c67-a03f-f398b0b9778f,IsActiveEntity=false)/content?Content-Type=application/pdf
+PUT http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestAttachmentsSet(ID=0622c5d5-2a6c-4872-9dd9-5f40eeff0a63,IsActiveEntity=false)/content?Content-Type=application/pdf
 Content-Type: application/pdf
 Authorization: Basic Krishna:4321
 
@@ -149,8 +149,8 @@ GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestAttachmentsS
 Authorization: Basic Krishna:4321
 
 
---------------------------------------------------------------------------------------------------------
--------------------------------------------------------------------------------------------------
+###--------------------------------------------------------------------------------------------------------
+
 ###Excel upload (in Base64 format)
 POST http://localhost:4004/odata/v4/purchase-requests/uploadPurchaseRequests
 Content-Type: application/json
@@ -172,4 +172,14 @@ Authorization: Basic Krishna:4321
 
 ###Data in PurchaseRequestUploadSet 
 GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestUploadLogsSet
+Authorization: Basic Krishna:4321
+
+----------------------------------------------------------
+
+###Approval Recommendation
+GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(550e8400-e29b-41d4-a716-446655440004)/getApprovalRecommendation
+Authorization: Basic Krishna:4321
+
+###check Attachment records
+GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestAttachmentsSet
 Authorization: Basic Krishna:4321

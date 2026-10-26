@@ -1,7 +1,8 @@
 using {
     rajesh.db.master,
     rajesh.db.transaction,
-    rajesh.db.UploadResult
+    rajesh.db.UploadResult,
+    rajesh.db.ApprovalRecommendation
 } from '../db/datamodel';
 
 service PurchaseRequestService @(path    : 'purchase-requests', requires: 'authenticated-user') {
@@ -38,6 +39,7 @@ service PurchaseRequestService @(path    : 'purchase-requests', requires: 'authe
             action rejectRequest(approverEmail: String(100) not null,
                                  approverRemarks: String(500) not null);
 
+            function getApprovalRecommendation() returns ApprovalRecommendation;
 
         };
 

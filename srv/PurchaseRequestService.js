@@ -489,6 +489,110 @@ this.on('uploadPurchaseRequests', async (req) => {
             );
         }
       });
+// Condition	Expected Recommendation
+// estimatedAmount <= 25000 and attachment exists	decision = Recommended, riskLevel = Low, approver = Manager
+// estimatedAmount > 25000 and <= 100000	decision = ReviewRequired, riskLevel = Medium, approver = Senior Manager
+// estimatedAmount > 100000	decision = ReviewRequired, riskLevel = High, approver = Director
+// itemCategory = SOFTWARE and businessJustification is short/missing	decision = ReviewRequired, riskLevel = Medium, message = Need detailed software justification
+// requiredByDate is within next 3 days	riskLevel should be increased because it is urgent
+
+
+    this.on('getApprovalRecommendation', async (req) => {
+
+        const requestId = req.params[0].ID;
+        console.log(requestId);
+        const request = await this.read(PurchaseRequestsSet, requestId);
+        console.log(request);
+
+        if (!request) {
+            return req.reject(404, "Purchase request not found");
+        }
+
+        // Only submitted requests can receive a recommendation
+        if (request.status !== 'Submitted') {
+            return req.reject(
+                400,
+                'Approval recommendation is available only for submitted requests'
+            );
+        }
+
+        //Check whether attachment exist
+        const attachment = await SELECT.one
+            .from(PurchaseRequestAttachmentsSet)
+            .where({
+                purchaseRequest_ID: requestId
+            });
+
+        const hasAttachment = Boolean(attachment);
+        console.log('Has attachment:', hasAttachment);
+
+         // 2.  Set default values
+        let decision = 'ReviewRequired';
+        let riskLevel = 'Medium';
+        let suggestedApproverLevel = 'Manager';
+        let message = 'Manual review is required.';
+
+
+        //Date diff calculation
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const requiredDate = new Date(
+            `${request.requiredByDate}T00:00:00`
+        );
+
+        const diffTime = requiredDate.getTime() - today.getTime();
+
+        const diffDays = Math.ceil(
+            diffTime / (1000 * 60 * 60 * 24)
+        );
+
+        console.log(`Days remaining: ${diffDays}`);
+
+        //Check the amount
+        if (request.estimatedAmount <= 25000 && hasAttachment) {
+            decision = 'Recommended';
+            riskLevel = 'Low';
+            suggestedApproverLevel = 'Manager';
+            message = 'Low-value request with attachment.';
+        } else if (request.estimatedAmount <= 100000) {
+            decision = 'ReviewRequired';
+            riskLevel = 'Medium';
+            suggestedApproverLevel = 'Senior Manager';
+            message = 'Senior Manager review is required.';
+        } else {
+            decision = 'ReviewRequired';
+            riskLevel = 'High';
+            suggestedApproverLevel = 'Director';
+            message = 'Director review is required.';
+        }
+        //Check the software justification
+        if (request.itemCategory_code === 'SOFTWARE' && (request.businessJustification || '').trim().length < 30 ) {
+            decision = 'ReviewRequired';
+            riskLevel = 'Medium';
+            message = 'Need detailed software justification';
+        }
+        //Check Urgency
+        if (diffDays >= 0 && diffDays <= 3) {
+            decision = 'ReviewRequired';
+
+            if (riskLevel === 'Low') {
+                riskLevel = 'Medium';
+            } else if (riskLevel === 'Medium') {
+                riskLevel = 'High';
+            }
+
+            message += ' The request is urgent.';
+        }
+
+        //Return the result
+        return {
+            decision,
+            riskLevel,
+            suggestedApproverLevel,
+            message
+        };
+    });
 
 
   return super.init()
