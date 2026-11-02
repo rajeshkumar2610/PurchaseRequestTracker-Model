@@ -2,17 +2,6 @@
 GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet
 Authorization: Basic Rajesh:2610
 
-
-
-
-
-
-
-
-
-
-
-
 ###GET DepartmentsSet
 GET http://localhost:4004/odata/v4/purchase-requests/DepartmentsSet
 
@@ -182,4 +171,11 @@ Authorization: Basic Krishna:4321
 
 ###check Attachment records
 GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestAttachmentsSet
+Authorization: Basic Krishna:4321
+
+
+###-----------------------------------------------------------------------------
+
+###
+GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestReport
 Authorization: Basic Krishna:4321
