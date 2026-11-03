@@ -1,61 +1,77 @@
-using { cuid,managed} from '@sap/cds/common';
+using {cuid, managed} from '@sap/cds/common';
 
 //unique name for project
 namespace rajesh.db;
 
 context transaction {
-    entity PurchaseRequests  : cuid, managed {
-        requestNo             : String(20) @title: '{i18n>requestNo}';
-        requesterName         : String(100) @title: '{i18n>requesterName}';
-        requesterEmail        : String(100) @title: '{i18n>requesterEmail}';
-        department            : Association to master.Departments @title: '{i18n>department}';
-        itemName              : String(100) @title: '{i18n>itemName}';
+    entity PurchaseRequests : cuid, managed {
+        requestNo             : String(20)                           @title: '{i18n>requestNo}';
+        requesterName         : String(100)                          @title: '{i18n>requesterName}';
+        requesterEmail        : String(100)                          @title: '{i18n>requesterEmail}';
+        department            : Association to master.Departments    @title: '{i18n>department}';
+        itemName              : String(100)                          @title: '{i18n>itemName}';
         itemCategory          : Association to master.ItemCategories @title: '{i18n>itemCategory}';
-        quantity              : Integer @title: '{i18n>quantity}';
-        estimatedAmount       : Decimal(15, 2) @title: '{i18n>estimatedAmount}';
-        currency              : String(3) @title: '{i18n>currency}';
-        requestDate           : Date @title: '{i18n>requestDate}';
-        requiredByDate        : Date @title: '{i18n>requiredByDate}';
-        businessJustification : String(500) @title: '{i18n>businessJustification}';
-        status                : String(20) @title: '{i18n>status}';
-        approverEmail         : String(100) @title: '{i18n>approverEmail}';
-        approvalDate          : Date @title: '{i18n>approvalDate}';
-        approverRemarks       : String(500) @title: '{i18n>approverRemarks}';
-        attachments : Composition of many PurchaseRequestAttachments on attachments.purchaseRequest = $self;
+        quantity              : Integer                              @title: '{i18n>quantity}';
+        estimatedAmount       : Decimal(15, 2)                       @title: '{i18n>estimatedAmount}';
+        currency              : String(3)                            @title: '{i18n>currency}';
+        requestDate           : Date                                 @title: '{i18n>requestDate}';
+        requiredByDate        : Date                                 @title: '{i18n>requiredByDate}';
+        businessJustification : String(500)                          @title: '{i18n>businessJustification}';
+        status                : String(20)                           @title: '{i18n>status}';
+        isOverdue             : Boolean default false;
+        escalationStatus      : String(20);
+        escalatedAt           : Timestamp;
+        approverEmail         : String(100)                          @title: '{i18n>approverEmail}';
+        approvalDate          : Date                                 @title: '{i18n>approvalDate}';
+        approverRemarks       : String(500)                          @title: '{i18n>approverRemarks}';
+        attachments           : Composition of many PurchaseRequestAttachments
+                                    on attachments.purchaseRequest = $self;
     }
-     entity PurchaseRequestReport
-        as select from PurchaseRequests {
+
+    entity PurchaseRequestReport as
+        select from PurchaseRequests {
             key department,
             key status,
-            count(*)            as totalRequests : Integer,
-            sum(estimatedAmount) as totalAmount   : Decimal(15,2)
+                count( * )           as totalRequests : Integer,
+                sum(estimatedAmount) as totalAmount   : Decimal(15, 2)
         }
-        group by department, status;
+        group by
+            department,
+            status;
 
 
     entity PurchaseRequestAttachments : managed {
-        key ID          : UUID;
-        purchaseRequest : Association to PurchaseRequests;
-        fileName        : String(255);
+        key ID              : UUID;
+            purchaseRequest : Association to PurchaseRequests;
+            fileName        : String(255);
 
-        @Core.IsMediaType
-        mimeType        : String(100);
-        size            : Integer;
+            @Core.IsMediaType
+            mimeType        : String(100);
+            size            : Integer;
 
-        @Core.MediaType: mimeType
-        @Core.ContentDisposition.Filename: fileName
-        content         : LargeBinary;
-        uploadedBy      : String(100);
-        uploadedAt      : Timestamp;
+            @Core.MediaType                  : mimeType
+            @Core.ContentDisposition.Filename: fileName
+            content         : LargeBinary;
+            uploadedBy      : String(100);
+            uploadedAt      : Timestamp;
     }
 
     entity PurchaseRequestUploadLogs : managed {
-        key ID       : UUID;
-        uploadId     : UUID;
-        rowNumber    : Integer;
-        status       : String(20);
-        errorMessage : String(1000);
+        key ID           : UUID;
+            uploadId     : UUID;
+            rowNumber    : Integer;
+            status       : String(20);
+            errorMessage : String(1000);
     }
+    entity ApplicationLogs : managed {
+    key ID         : UUID;
+    objectType     : String(50);
+    objectId       : String(100);
+    action         : String(50);
+    status         : String(20);
+    message        : String(1000);
+    createdByUser  : String(100);
+}
 }
 
 type UploadResult {
@@ -66,10 +82,10 @@ type UploadResult {
 }
 
 type ApprovalRecommendation {
-  decision               : String(30);   // Recommended / ReviewRequired / NotRecommended
-  riskLevel              : String(20);   // Low / Medium / High
-  suggestedApproverLevel : String(30);   // Manager / Senior Manager / Director
-  message                : String(500);
+    decision               : String(30); // Recommended / ReviewRequired / NotRecommended
+    riskLevel              : String(20); // Low / Medium / High
+    suggestedApproverLevel : String(30); // Manager / Senior Manager / Director
+    message                : String(500);
 }
 
 
@@ -82,7 +98,7 @@ context master {
 
     entity ItemCategories {
         key code        : String(20);
-        description : String(100);
+            description : String(100);
     }
 
 }

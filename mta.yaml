@@ -45,6 +45,7 @@ modules:
     requires:
       - name: PurchaseRequestTracker-MyBuild-db
       - name: PurchaseRequestTracker-MyBuild-auth
+      - name: PurchaseRequestTracker-MyBuild-jobscheduler
 
   - name: PurchaseRequestTracker-MyBuild-db-deployer
     type: hdb
@@ -86,3 +87,8 @@ resources:
             description: 'generated'
             role-template-references:
               - '$XSAPPNAME.AdminRole'
+  - name: PurchaseRequestTracker-MyBuild-jobscheduler
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: jobscheduler
+      service-plan: free

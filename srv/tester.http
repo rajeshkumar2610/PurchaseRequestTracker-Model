@@ -58,7 +58,7 @@ GET  http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(5f5977
 ###-------------------------------------------------------------------------------------------------------------
 
 ###Action: Approve a purchase request
-POST http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(550e8400-e29b-41d4-a716-446655440004)/approveRequest
+POST http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(550e8400-e29b-41d4-a716-446655440003)/approveRequest
 Content-Type: application/json
 Authorization: Basic Naveen:1234
 
@@ -86,7 +86,7 @@ GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestReport
 
 
 ###-------------------------------------------------------------------------------------
-
+##Attachment concept (Uplaod any attachment like pdf, quotation, document for a particulat PR)
 
 ###  STEP 1: Create a Draft of the Purchase Request (for ID=550e8400-e29b-41d4-a716-446655440004)
 POST http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(ID=550e8400-e29b-41d4-a716-446655440004,IsActiveEntity=true)/PurchaseRequestService.draftEdit
@@ -139,6 +139,7 @@ Authorization: Basic Krishna:4321
 
 
 ###--------------------------------------------------------------------------------------------------------
+###Mass request creation using Excel upload.
 
 ###Excel upload (in Base64 format)
 POST http://localhost:4004/odata/v4/purchase-requests/uploadPurchaseRequests
@@ -163,7 +164,7 @@ Authorization: Basic Krishna:4321
 GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestUploadLogsSet
 Authorization: Basic Krishna:4321
 
-----------------------------------------------------------
+###----------------------------------------------------------
 
 ###Approval Recommendation
 GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet(550e8400-e29b-41d4-a716-446655440004)/getApprovalRecommendation
@@ -176,6 +177,21 @@ Authorization: Basic Krishna:4321
 
 ###-----------------------------------------------------------------------------
 
-###
+###Purchase request report which we created as part of Phase 1
 GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestReport
+Authorization: Basic Krishna:4321
+
+###-----------------------------------------------------------------------------
+
+###Action checkOverdueRequests
+POST http://localhost:4004/odata/v4/purchase-requests/checkOverdueRequests
+Authorization: Basic Krishna:4321
+
+###View all the Purchase request
+GET http://localhost:4004/odata/v4/purchase-requests/PurchaseRequestsSet
+Authorization: Basic Krishna:4321
+
+
+###View the entered Applicationlogs
+GET http://localhost:4004/odata/v4/purchase-requests/ApplicationLogsSet 
 Authorization: Basic Krishna:4321

@@ -40,14 +40,18 @@ service PurchaseRequestService @(path    : 'purchase-requests', requires: 'authe
                                  approverRemarks: String(500) not null);
 
             function getApprovalRecommendation() returns ApprovalRecommendation;
-
         };
 
+    // Unbound action
     action uploadPurchaseRequests(
         fileName    : String(255),
         fileContent : LargeString) returns UploadResult;
 
-     @restrict: [
+    // Unbound action
+    //@requires: 'JobScheduler'
+    action checkOverdueRequests() returns String;
+    
+    @restrict: [
     { grant: 'READ', to: 'PurchaseRequestViewer' },
     { grant: '*', to: 'PurchaseRequestAdmin' }
     ]
@@ -70,4 +74,6 @@ service PurchaseRequestService @(path    : 'purchase-requests', requires: 'authe
     entity PurchaseRequestAttachmentsSet as projection on transaction.PurchaseRequestAttachments;
 
     entity PurchaseRequestUploadLogsSet as projection on transaction.PurchaseRequestUploadLogs;
+
+    entity ApplicationLogsSet as projection on transaction.ApplicationLogs;
 }

@@ -1,5 +1,5 @@
 {
-  "xsappname": "PurchaseRequestTracker",
+  "xsappname": "PurchaseRequestTracker-MyBuild-2afbcec4trial-dev",
   "tenant-mode": "dedicated",
   "scopes": [
     {
@@ -17,6 +17,13 @@
     {
       "name": "$XSAPPNAME.PurchaseRequestAdmin",
       "description": "Associate have admin access"
+    },
+    {
+      "name": "$XSAPPNAME.JobScheduler",
+      "description": "Allows SAP Job Scheduler to execute scheduled actions",
+      "grant-as-authority-to-apps": [
+        "$XSSERVICENAME(PurchaseRequestTracker-MyBuild-jobscheduler)"
+      ]
     }
   ],
   "role-templates": [
